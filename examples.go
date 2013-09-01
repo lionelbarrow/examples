@@ -27,14 +27,14 @@ func (e *Example) Expect(target interface{}) *quiz.Expectation {
 }
 
 func Describe(description string, harness Harness, results ...Example) {
-	execute(description, harness, results)
+	exampleBlock(description, harness, results)
 }
 
 func When(description string, harness Harness, results ...Example) {
-	execute(description, harness, results)
+	exampleBlock(description, harness, results)
 }
 
-func execute(description string, harness Harness, results []Example) {
+func exampleBlock(description string, harness Harness, results []Example) {
 	for _, result := range results {
 		if result.Failed {
 			harness.Log("When " + description + " " + result.Description)
