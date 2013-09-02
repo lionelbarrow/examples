@@ -1,5 +1,7 @@
 ### Examples
 
+[![Build Status](https://travis-ci.org/lionelbarrow/examples.png?branch=master)](https://travis-ci.org/lionelbarrow/examples)
+
 A lightweight behavioral testing library for Go.
 
 Here's how it works: Write regular tests using the Go standard library, making your assertions with the [quiz library](https://github.com/benmills/quiz). If you ever feel like you're writing tests that should be grouped together, use a `When` or `Describe` function to group them, like this:
