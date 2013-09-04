@@ -59,9 +59,9 @@ func It(description string, testBody func(t *Example)) Example {
 	if descriptionIsFiltered(description) {
 		testBody(example)
 		return Example{Description: "it " + description + ": \n" + example.Description, Failed: example.Failed}
-	} else {
-		return Example{Skip: true}
 	}
+
+	return Example{Skip: true}
 }
 
 func descriptionIsFiltered(description string) bool {
