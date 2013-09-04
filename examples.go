@@ -1,7 +1,7 @@
 package examples
 
 import (
-	"github.com/lionelbarrow/quiz"
+	"github.com/benmills/quiz"
 	"strings"
 	"flag"
 )
