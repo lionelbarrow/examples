@@ -2,7 +2,16 @@ package examples
 
 import (
 	"github.com/lionelbarrow/quiz"
+	"strings"
+	"flag"
 )
+
+var filter string;
+
+func init() {
+	flag.StringVar(&filter, "examples.run", "", "define a filter for example cases")
+	flag.Parse()
+}
 
 type Harness interface {
 	Log(...interface{})
@@ -12,6 +21,7 @@ type Harness interface {
 type Example struct {
 	Description string
 	Failed      bool
+	Skip        bool
 }
 
 func (e *Example) Fail() {
@@ -36,7 +46,7 @@ func When(description string, harness Harness, results ...Example) {
 
 func exampleBlock(description string, harness Harness, results []Example) {
 	for _, result := range results {
-		if result.Failed {
+		if !result.Skip && result.Failed {
 			harness.Log("When " + description + " " + result.Description)
 			harness.Fail()
 		}
@@ -45,6 +55,15 @@ func exampleBlock(description string, harness Harness, results []Example) {
 
 func It(description string, testBody func(t *Example)) Example {
 	example := &Example{Description: "", Failed: false}
-	testBody(example)
-	return Example{Description: "it " + description + ": \n" + example.Description, Failed: example.Failed}
+
+	if descriptionIsFiltered(description) {
+		testBody(example)
+		return Example{Description: "it " + description + ": \n" + example.Description, Failed: example.Failed}
+	}
+
+	return Example{Skip: true}
+}
+
+func descriptionIsFiltered(description string) bool {
+	return len(filter) == 0 || strings.Contains(description, filter)
 }
