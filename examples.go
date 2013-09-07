@@ -1,12 +1,12 @@
 package examples
 
 import (
+	"flag"
 	"github.com/benmills/quiz"
 	"strings"
-	"flag"
 )
 
-var filter string;
+var filter string
 
 func init() {
 	flag.StringVar(&filter, "examples.run", "", "define a filter for example cases")
@@ -36,6 +36,8 @@ func (e *Example) Expect(target interface{}) *quiz.Expectation {
 	return quiz.NewExpecation(e, target)
 }
 
+type Expectation func(interface{}) *quiz.Expectation
+
 func Describe(description string, harness Harness, results ...Example) {
 	exampleBlock(description, harness, results)
 }
@@ -53,15 +55,24 @@ func exampleBlock(description string, harness Harness, results []Example) {
 	}
 }
 
-func It(description string, testBody func(t *Example)) Example {
+func It(description string, testBody func(Expectation)) Example {
 	example := &Example{Description: "", Failed: false}
 
 	if descriptionIsFiltered(description) {
-		testBody(example)
+		expectation := newExpectation(example)
+		testBody(expectation)
 		return Example{Description: "it " + description + ": \n" + example.Description, Failed: example.Failed}
 	}
 
 	return Example{Skip: true}
+}
+
+func newExpectation(ex *Example) Expectation {
+	expectation := func(target interface{}) *quiz.Expectation {
+		return quiz.NewExpecation(ex, target)
+	}
+
+	return expectation
 }
 
 func descriptionIsFiltered(description string) bool {

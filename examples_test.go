@@ -29,8 +29,8 @@ func TestSingleExample(t *testing.T) {
 	h := harness()
 
 	When("we're in this one state", h,
-		It("does the right thing", func(t *Example) {
-			t.Expect(1).ToEqual(2)
+		It("does the right thing", func(expect Expectation) {
+			expect(1).ToEqual(2)
 		}),
 	)
 
@@ -45,12 +45,12 @@ func TestTwoExamples(t *testing.T) {
 	h := harness()
 
 	When("writing a test library", h,
-		It("helps to write tests", func(t *Example) {
-			t.Expect("foo").ToContain("bar")
+		It("helps to write tests", func(expect Expectation) {
+			expect("foo").ToContain("bar")
 		}),
 
-		It("helps to test thoroughly", func(t *Example) {
-			t.Expect("baz").ToEqual("eggs")
+		It("helps to test thoroughly", func(expect Expectation) {
+			expect("baz").ToEqual("eggs")
 		}),
 	)
 
@@ -67,8 +67,8 @@ func TestPassing(t *testing.T) {
 	h := harness()
 
 	When("writing a test library", h,
-		It("helps to write tests", func(t *Example) {
-			t.Expect(1).ToEqual(1)
+		It("helps to write tests", func(expect Expectation) {
+			expect(1).ToEqual(1)
 		}),
 	)
 
