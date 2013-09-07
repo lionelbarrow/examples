@@ -13,40 +13,22 @@ func init() {
 	flag.Parse()
 }
 
+type Expectation func(interface{}) *quiz.Expectation
+
 type Harness interface {
 	Log(...interface{})
 	Fail()
 }
 
-type Example struct {
-	Description string
-	Failed      bool
-	Skip        bool
-}
-
-func (e *Example) Fail() {
-	e.Failed = true
-}
-
-func (e *Example) Log(line string) {
-	e.Description = line
-}
-
-func (e *Example) Expect(target interface{}) *quiz.Expectation {
-	return quiz.NewExpecation(e, target)
-}
-
-type Expectation func(interface{}) *quiz.Expectation
-
-func Describe(description string, harness Harness, results ...Example) {
+func Describe(description string, harness Harness, results ...example) {
 	exampleBlock(description, harness, results)
 }
 
-func When(description string, harness Harness, results ...Example) {
+func When(description string, harness Harness, results ...example) {
 	exampleBlock(description, harness, results)
 }
 
-func exampleBlock(description string, harness Harness, results []Example) {
+func exampleBlock(description string, harness Harness, results []example) {
 	for _, result := range results {
 		if !result.Skip && result.Failed {
 			harness.Log("When " + description + " " + result.Description)
@@ -55,26 +37,38 @@ func exampleBlock(description string, harness Harness, results []Example) {
 	}
 }
 
-func It(description string, testBody func(Expectation)) Example {
-	example := &Example{Description: "", Failed: false}
+func It(description string, testBody func(Expectation)) example {
+	recorder := &example{Description: "", Failed: false}
 
 	if descriptionIsFiltered(description) {
-		expectation := newExpectation(example)
-		testBody(expectation)
-		return Example{Description: "it " + description + ": \n" + example.Description, Failed: example.Failed}
+    expectation := func(target interface{}) *quiz.Expectation {
+      return quiz.NewExpecation(recorder, target)
+    }
+    testBody(expectation)
+		return example{Description: "it " + description + ": \n" + recorder.Description, Failed: recorder.Failed}
 	}
 
-	return Example{Skip: true}
-}
-
-func newExpectation(ex *Example) Expectation {
-	expectation := func(target interface{}) *quiz.Expectation {
-		return quiz.NewExpecation(ex, target)
-	}
-
-	return expectation
+	return example{Skip: true}
 }
 
 func descriptionIsFiltered(description string) bool {
 	return len(filter) == 0 || strings.Contains(description, filter)
+}
+
+type example struct {
+	Description string
+	Failed      bool
+	Skip        bool
+}
+
+func (e *example) Fail() {
+	e.Failed = true
+}
+
+func (e *example) Log(line string) {
+	e.Description = line
+}
+
+func (e *example) Expect(target interface{}) *quiz.Expectation {
+	return quiz.NewExpecation(e, target)
 }
