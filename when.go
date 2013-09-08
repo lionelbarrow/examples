@@ -16,24 +16,28 @@ type Harness interface {
 	FailNow()
 }
 
-func Describe(description string, harness Harness, results ...example) {
+func Describe(description string, harness Harness, results ...result) {
 	exampleBlock(description, harness, results)
 }
 
-func When(description string, harness Harness, results ...example) {
+func When(description string, harness Harness, results ...result) {
 	exampleBlock(description, harness, results)
 }
 
-func exampleBlock(description string, harness Harness, results []example) {
+func exampleBlock(description string, harness Harness, results []result) {
+	failed := false
 	for _, result := range results {
 		if !result.Skip && result.Failed {
 			harness.Log("When " + description + " " + result.Description)
-			harness.FailNow()
+			failed = true
 		}
+	}
+	if failed {
+		harness.FailNow()
 	}
 }
 
-type example struct {
+type result struct {
 	Description string
 	Failed      bool
 	Skip        bool

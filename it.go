@@ -2,38 +2,39 @@ package examples
 
 import (
 	"fmt"
-	"github.com/lionelbarrow/quiz"
+	"github.com/benmills/quiz"
 	"strings"
 )
 
 type Expectation func(interface{}) *quiz.Expectation
 
-func It(description string, testBody func(Expectation)) example {
-	if !descriptionIsFiltered(description) {
-		return example{Skip: true}
+func It(behavior string, testBody func(Expectation)) result {
+	if len(filter) > 0 && strings.Contains(behavior, filter) {
+		return result{Skip: true}
 	}
 
 	listener, runner := newListenerRunnerPair()
+	go executeTestBody(behavior, runner, testBody)
+	passed, desc := listener.Results()
 
+	if !passed {
+		return result{Description: "it " + behavior + ": \n" + desc, Failed: true}
+	}
+	return result{Description: "it " + behavior, Failed: false}
+}
+
+func executeTestBody(desc string, runner *exampleRunner, body func(Expectation)) {
 	expectation := func(target interface{}) *quiz.Expectation {
 		return quiz.NewExpectation(runner, target)
 	}
-	go func() {
-		defer func() {
-			if r := recover(); r != nil {
-				runner.Log(fmt.Sprintf("Panic while executing test: %v", r))
-				runner.FailNow()
-			}
-		}()
-		testBody(expectation)
-		runner.Pass()
+	defer func() {
+		if r := recover(); r != nil {
+			runner.Log(fmt.Sprintf("Panic while executing it '"+desc+"': %v", r))
+			runner.FailNow()
+		}
 	}()
-	passed, failureDescription := listener.Results()
-	return example{Description: "it " + description + ": \n" + failureDescription, Failed: !passed}
-}
-
-func descriptionIsFiltered(description string) bool {
-	return len(filter) == 0 || strings.Contains(description, filter)
+	body(expectation)
+	runner.Pass()
 }
 
 func newListenerRunnerPair() (*exampleRunner, *exampleRunner) {

@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestSingleExample(t *testing.T) {
+func TestFailingIt(t *testing.T) {
 	h := harness()
 
 	When("we're in this one state", h,
@@ -21,29 +21,7 @@ func TestSingleExample(t *testing.T) {
 	}
 }
 
-func TestTwoExamples(t *testing.T) {
-	h := harness()
-
-	When("writing a test library", h,
-		It("helps to write tests", func(expect Expectation) {
-			expect("foo").ToContain("bar")
-		}),
-
-		It("helps to test thoroughly", func(expect Expectation) {
-			expect("baz").ToEqual("eggs")
-		}),
-	)
-
-	if !h.Failed {
-		t.Fail()
-	} else if !strings.Contains(h.Messages[0], "When writing a test library it helps to write tests") {
-		t.Fail()
-	} else if !strings.Contains(h.Messages[1], "When writing a test library it helps to test thoroughly") {
-		t.Fail()
-	}
-}
-
-func TestPassing(t *testing.T) {
+func TestPassingIt(t *testing.T) {
 	h := harness()
 
 	When("writing a test library", h,
@@ -86,7 +64,25 @@ func TestItReportsFirstAssertionToFail(t *testing.T) {
 
 	if !h.Failed {
 		t.Fail()
-	} else if true {
-		t.Log(h.Messages)
+	} else if len(h.Messages) != 1 {
+		t.Fail()
+	} else if !strings.Contains(h.Messages[0], "Expected 2 to equal 1.") {
+		t.Fail()
+	}
+}
+
+func TestItHandlesPanics(t *testing.T) {
+	h := harness()
+
+	When("writing a test library", h,
+		It("helps to write tests", func(expect Expectation) {
+			panic("Oh no!!")
+		}),
+	)
+
+	if !h.Failed {
+		t.Fail()
+	} else if !strings.Contains(h.Messages[0], "Panic while executing it 'helps to write tests': Oh no!!") {
+		t.Fail()
 	}
 }
