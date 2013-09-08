@@ -14,12 +14,12 @@ import (
 
 func TestMyClass(t *testing.T) {
   e.When("writing software", t,
-    e.It("helps to have tests", func(ex *e.Example) {
-      ex.Expect(1).ToEqual(1)
+    e.It("helps to have tests", func(expect *e.Expectation) {
+      expect(1).ToEqual(1)
     }),
 
-    e.It("helps to have correct tests", func(ex *e.Example) {
-      ex.Expect(1).ToEqual(2)
+    e.It("helps to have correct tests", func(expect *e.Expectation) {
+      expect(1).ToEqual(2)
     }),
   )
 }
