@@ -1,29 +1,9 @@
 package examples
 
 import (
-	"fmt"
 	"strings"
 	"testing"
 )
-
-func harness() *fakeHarness {
-	return &fakeHarness{false, []string{}}
-}
-
-type fakeHarness struct {
-	Failed   bool
-	Messages []string
-}
-
-func (f *fakeHarness) Fail() {
-	f.Failed = true
-}
-
-func (f *fakeHarness) Log(args ...interface{}) {
-	for _, arg := range args {
-		f.Messages = append(f.Messages, fmt.Sprintf("%v", arg))
-	}
-}
 
 func TestSingleExample(t *testing.T) {
 	h := harness()
@@ -74,5 +54,39 @@ func TestPassing(t *testing.T) {
 
 	if h.Failed {
 		t.Fail()
+	}
+}
+
+func TestItHaltsAfterFirstFailure(t *testing.T) {
+	h := harness()
+	keptGoing := false
+
+	When("executing an example", h,
+		It("doesn't keep going after a failure", func(expect Expectation) {
+			expect(1).ToEqual(2)
+
+			keptGoing = true
+		}),
+	)
+
+	if keptGoing {
+		t.Fail()
+	}
+}
+
+func TestItReportsFirstAssertionToFail(t *testing.T) {
+	h := harness()
+
+	When("writing a test library", h,
+		It("helps to write tests", func(expect Expectation) {
+			expect(1).ToEqual(2)
+			expect(1).ToEqual(3)
+		}),
+	)
+
+	if !h.Failed {
+		t.Fail()
+	} else if true {
+		t.Log(h.Messages)
 	}
 }
