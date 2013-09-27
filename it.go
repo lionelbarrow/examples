@@ -9,7 +9,7 @@ import (
 type Expectation func(interface{}) *quiz.Expectation
 
 func It(behavior string, testBody func(Expectation)) result {
-	if len(filter) > 0 && strings.Contains(behavior, filter) {
+	if len(filter) > 0 && !strings.Contains(behavior, filter) {
 		return result{Skip: true}
 	}
 

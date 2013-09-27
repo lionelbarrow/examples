@@ -2,6 +2,7 @@ package examples
 
 import (
 	"flag"
+  "testing"
 )
 
 var filter string
@@ -30,7 +31,9 @@ func exampleBlock(description string, harness Harness, results []result) {
 		if !result.Skip && result.Failed {
 			harness.Log("When " + description + " " + result.Description)
 			failed = true
-		}
+		} else if testing.Verbose() && !result.Failed && !result.Skip {
+      harness.Log("PASS: When " + description + " " + result.Description)
+    }
 	}
 	if failed {
 		harness.FailNow()
