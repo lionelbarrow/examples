@@ -66,7 +66,7 @@ func TestItReportsFirstAssertionToFail(t *testing.T) {
 		t.Fail()
 	} else if len(h.Messages) != 1 {
 		t.Fail()
-	} else if !strings.Contains(h.Messages[0], "Expected 2 to equal 1.") {
+	} else if !strings.Contains(h.Messages[0], "Expected 1 to equal 2.") {
 		t.Fail()
 	}
 }
